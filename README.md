@@ -44,24 +44,12 @@ The log information is stored in:
 - `log_level`
 - `message`
 
-The `service` field shows which service produced the record. The `timestamp`
-field shows when the observation was recorded. The timestamps use ISO 8601
-format and increase by one minute, from `10:00` to `10:09` on
-`2026-09-20`.
+The `service` field shows which service produced the record. The `timestamp`field shows when the observation was recorded. The timestamps use ISO 8601 format and increase by one minute, from `10:00` to `10:09` on`2026-09-20`.
 
-Most observations appear to be normal. The response time is generally between
-120 and 150 ms, CPU usage is between 42% and 50%, and memory usage is between
-51% and 57%. These records have an `INFO` log level and say that the payment
-request was processed successfully.
+Most observations appear to be normal. The response time is generally between 120 and 150 ms, CPU usage is between 42% and 50%, and memory usage is between 51% and 57%. These records have an `INFO` log level and say that the payment request was processed successfully.
 
-The observation at `10:05` appears to be unusual. The response time increases
-to 610 ms, CPU usage reaches 75%, and memory usage reaches 70%. The record also
-contains an `ERROR` message saying `Payment service timeout`.
+The observation at `10:05` appears to be unusual. The response time increases to 610 ms, CPU usage reaches 75%, and memory usage reaches 70%. The record also contains an `ERROR` message saying `Payment service timeout`.
 
-The observation at `10:06` is also unusual. The response time increases to
-640 ms, CPU usage reaches 94%, and memory usage reaches 91%. The log reports a
-`Database connection timeout`.
+The observation at `10:06` is also unusual. The response time increases to 640 ms, CPU usage reaches 94%, and memory usage reaches 91%. The log reports a `Database connection timeout`.
 
-These two records are different from the normal observations because they show
-higher resource usage, much slower response times, and error-level log
-messages.
+These two records are different from the normal observations because they show higher resource usage, much slower response times, and error-level log messages.
