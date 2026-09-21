@@ -66,3 +66,66 @@ Our anomaly engine processed all 10 records and successfully flagged the 10:05 a
 ### Gaps & Code Fixes
 *   Missed Log Alerts: The detector initially missed the textual errors because it was mistakenly hardcoded to search for `WARNING` logs instead of critical `ERROR` strings. Updating the logic to intercept `ERROR` log messages significantly improves our alerting context.
 *   Pipeline Limitation: Relying on fixed, hardcoded thresholds is brittle. If baseline service traffic changes naturally over time, static limits will cause a flood of false alerts. Switching to a rolling baseline (like dynamic Z-scores) would make the detection far more resilient.
+
+## Event Processing Flow
+
+When the logic flags an anomaly, it packages the incident into a structured event payload containing the timestamp, service name, metric values, and raw log message. 
+
+The data flows through four core components:
+*   **Event:** The data packet containing the problem details and the reason it was flagged.
+*   **Producer:** Receives the packet and publishes it directly to the message channel.
+*   **Topic:** An in-memory queue that temporarily holds events in sequence.
+*   **Consumer:** Subscribes to the topic, pulls the data packets, and prints them out as the final pipeline result.
+
+---
+
+## Issues Found & Corrected
+
+*   **Log Severity Mismatch:** The code was hardcoded to check for `WARNING` logs, missing the critical `ERROR` entries in our data. We updated the tracking logic to catch error-level logs and include them in the alert context.
+*   **Broken Pipeline Connection:** The producer and consumer were accidentally instantiated with separate in-memory topic instances. As a result, messages were being published into a void while the consumer listened to an empty queue. We passed the same topic reference to both components so data flows continuously.
+
+---
+
+## Final Workflow Result
+
+Running the complete tracking pipeline from the project root:
+```bash
+python src/aiops_pipeline.py
+```
+
+Produces the following successful run summary:
+*   **Records processed:** 10
+*   **Anomalies detected:** 2
+*   **Events consumed:** 2
+
+### Captured Incidents
+1.  **10:05:00:** Triggered by an elevated API response time and an explicit `Payment service timeout` error message.
+2.  **10:06:00:** Triggered by a critical combination of high latency, 94% CPU load, 91% memory usage, and a `Database connection timeout`.
+
+This confirms that events now successfully travel end-to-end through the detector, producer, topic, and consumer.
+
+---
+
+## Limitations & Better Approaches
+
+*   **Brittle Thresholds:** The script relies on hardcoded numeric limits. If normal service behavior or traffic levels change organically, these fixed numbers will trigger false alerts. A better approach is calculating a dynamic baseline from recent history using a moving average.
+*   **Volatile Storage:** The simulated topic lives entirely inside the running script's memory. If the process stops or crashes, all pending alerts are instantly lost. A production system requires a persistent message broker (like Kafka or RabbitMQ) to guarantee data survival.
+
+---
+
+## How to Reproduce this Demonstration
+
+1. Navigate to the project directory:
+   ```bash
+   cd /workspaces/github-skills-challenge
+   ```
+
+2. Verify raw anomaly tracking outputs:
+   ```bash
+   python -c "import json; from src.anomaly_detector import AnomalyDetector; data=json.load(open('data/service_data.json')); detector=AnomalyDetector(); [print(record['timestamp'], detector.detect(record)) for record in data]"
+   ```
+
+3. Run the complete end-to-end messaging pipeline:
+   ```bash
+   python src/aiops_pipeline.py
+   ```
