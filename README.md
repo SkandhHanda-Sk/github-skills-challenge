@@ -53,3 +53,16 @@ The observation at `10:05` appears to be unusual. The response time increases to
 The observation at `10:06` is also unusual. The response time increases to 640 ms, CPU usage reaches 94%, and memory usage reaches 91%. The log reports a `Database connection timeout`.
 
 These two records are different from the normal observations because they show higher resource usage, much slower response times, and error-level log messages.
+
+## Anomaly Detection Findings
+
+## Anomaly Detection Review
+
+Our anomaly engine processed all 10 records and successfully flagged the 10:05 and 10:06 incidents with zero false positives. 
+
+*   10:05 Capture: Flagged solely due to the response time jumping to 610 ms.
+*   10:06 Capture: Flagged for a combined system spike—response time hit 640 ms, CPU maxed at 94%, and memory reached 91%.
+
+### Gaps & Code Fixes
+*   Missed Log Alerts: The detector initially missed the textual errors because it was mistakenly hardcoded to search for `WARNING` logs instead of critical `ERROR` strings. Updating the logic to intercept `ERROR` log messages significantly improves our alerting context.
+*   Pipeline Limitation: Relying on fixed, hardcoded thresholds is brittle. If baseline service traffic changes naturally over time, static limits will cause a flood of false alerts. Switching to a rolling baseline (like dynamic Z-scores) would make the detection far more resilient.

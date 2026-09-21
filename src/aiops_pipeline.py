@@ -21,9 +21,7 @@ def run_pipeline(file_path):
     producer = EventProducer(producer_topic)
 
     # INTENTIONAL ASSESSMENT ISSUE #3
-    consumer_topic = EventTopic("anomaly-events")
-    consumer = EventConsumer(consumer_topic)
-
+    consumer = EventConsumer(producer_topic)  # changed from EventConsumer("service-events") to EventConsumer(producer_topic)
     detected_events = []
 
     for record in data:
