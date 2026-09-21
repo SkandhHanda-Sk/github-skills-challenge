@@ -129,3 +129,21 @@ This confirms that events now successfully travel end-to-end through the detecto
    ```bash
    python src/aiops_pipeline.py
    ```
+## Validation Results
+
+We installed the required project packages and validated the entire setup using the test suite:
+```bash
+pip install -r requirements.txt
+PYTHONPATH="/workspaces/github-skills-challenge:/workspaces/github-skills-challenge/src" python -m pytest -q
+```
+
+All tests passed successfully, confirming that:
+*   Healthy records are ignored (no false alarms).
+*   Abnormal records are correctly flagged.
+*   Events pass properly from the producer, through the topic, and into the consumer.
+
+We then executed the final pipeline:
+```bash
+python src/aiops_pipeline.py
+```
+The workflow successfully processed all **10 records**, isolated the **2 anomalies**, and consumed both events without dropping any data.
